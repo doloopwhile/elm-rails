@@ -10,3 +10,4 @@
 
 /elm-builds/node_modules
 lib/elm/bin/elm
+lib/elm/js

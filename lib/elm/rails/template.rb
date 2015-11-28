@@ -7,6 +7,9 @@ module Elm
     class Template < ::Tilt::Template
       self.default_mime_type = 'application/javascript'
 
+      def prepare
+      end
+
       def evaluate(context, locals, &block)
         if @output
           return @output
@@ -15,7 +18,7 @@ module Elm
         Dir.mktmpdir do |dir|
           Dir.chdir(dir) do
             elm_name = File.basename(file).capitalize
-            js_name = "#{name}.js"
+            js_name = "#{elm_name}.js"
 
             FileUtils.copy(file, elm_name)
             File.write 'elm-package.json', <<-EOS
@@ -35,15 +38,16 @@ module Elm
     "elm-version": "0.15.1 <= v < 0.16.0"
 }
             EOS
-            out, err, status = Open3.capture3("elm make #{elm_name} --yes --output #{js_name}")
-            Rails.logger.info(out)
-            Rails.logger.warn(err)
+            out, err, status = Open3.capture3("#{elm_command_path} make #{elm_name} --yes --output #{js_name}")
+            ::Rails.logger.debug out
+            ::Rails.logger.error err
             unless status.success?
               fail err
             end
             @output = File.read(js_name)
           end
         end
+        @output
       end
 
       # @override
@@ -57,6 +61,12 @@ module Elm
 
       def initialize_engine
         require_template_library 'elm/rails/compiler'
+      end
+
+      private
+
+      def elm_command_path
+        File.expand_path '../../js/elm/binwrappers/elm', __FILE__
       end
     end
   end

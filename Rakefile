@@ -8,10 +8,10 @@ namespace :elm do
     end
   end
 
-  task :copy do
-    FileUtils.cp(
-      File.expand_path("../elm-builds/node_modules/.bin/elm", __FILE__),
-      File.expand_path("../lib/elm/bin/elm", __FILE__)
-    )
+  JS_DIR = File.expand_path("../lib/elm/js/", __FILE__)
+  directory JS_DIR
+  task :copy => JS_DIR do
+    elm_dir = File.expand_path("../elm-builds/node_modules/elm", __FILE__)
+    sh %Q(cp -r "#{elm_dir}" "#{JS_DIR}")
   end
 end
