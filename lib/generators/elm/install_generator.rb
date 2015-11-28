@@ -12,8 +12,8 @@ module Elm
         desc: 'Skip Git keeps'
 
       def create_directory
-        empty_directory 'app/assets/javascripts/elm-components'
-        create_file 'app/assets/javascripts/elm-components/.gitkeep' unless options[:skip_git]
+        empty_directory 'app/assets/javascripts/elm-modules'
+        create_file 'app/assets/javascripts/elm-modules/.gitkeep' unless options[:skip_git]
       end
 
       def inject_elm
@@ -37,12 +37,12 @@ module Elm
       end
 
       def inject_components
-        inject_into_file manifest, "//= require elm-components\n", {after: "//= require elm\n"}
+        inject_into_file manifest, "//= require elm-modules\n", {after: "//= require elm\n"}
       end
 
       def create_components
-        components_js = "//= require_tree ./elm-components\n"
-        components_file = File.join(*%w(app assets javascripts elm-components.js))
+        components_js = "//= require_tree ./elm-modules\n"
+        components_file = File.join(*%w(app assets javascripts elm-modules.js))
         create_file components_file, components_js
       end
 
