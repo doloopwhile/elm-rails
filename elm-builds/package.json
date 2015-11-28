@@ -1,0 +1,9 @@
+{
+  "name": "elm-rails-builds",
+  "version": "0.0.0",
+  "description": "Prepares elm-rails asset files",
+  "main": "elm.js",
+  "dependencies": {
+    "elm": "0.16.0"
+  }
+}
