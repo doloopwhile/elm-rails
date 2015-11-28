@@ -5,19 +5,21 @@ module Elm
 
       desc 'Create default elm.js folder layout and prep application.js'
 
-      class_option :skip_git,
+      class_option(
+        :skip_git,
         type: :boolean,
         aliases: '-g',
         default: false,
         desc: 'Skip Git keeps'
+      )
 
       def create_directory
         empty_directory 'app/assets/javascripts/elm-modules'
         create_file 'app/assets/javascripts/elm-modules/.gitkeep' unless options[:skip_git]
       end
 
-      def inject_elm
-        require_elm = "//= require elm\n"
+      def inject_elm_modules_js
+        require_elm = "//= require elm-modules\n"
 
         unless manifest.exist?
           create_file manifest, require_elm
@@ -27,23 +29,22 @@ module Elm
         manifest_contents = File.read(manifest)
 
         if manifest_contents.include? 'require turbolinks'
-          inject_into_file manifest, require_elm, {after: "//= require turbolinks\n"}
-        elsif manifest_contents.include? 'require_tree'
-          require_tree = manifest_contents.match(/\/\/= require_tree[^\n]*/)[0]
-          inject_into_file manifest, require_elm, {before: require_tree}
-        else
-          append_file manifest, require_elm
+          inject_into_file manifest, require_elm, after: "//= require turbolinks\n"
+          return
         end
+
+        if manifest_contents.include? 'require_tree'
+          require_tree = manifest_contents.match(%r{//= require_tree[^\n]*})[0]
+          inject_into_file manifest, require_elm, before: require_tree
+          return
+        end
+
+        append_file manifest, require_elm
       end
 
-      def inject_components
-        inject_into_file manifest, "//= require elm-modules\n", {after: "//= require elm\n"}
-      end
-
-      def create_components
-        components_js = "//= require_tree ./elm-modules\n"
+      def create_elm_modules_js
         components_file = File.join(*%w(app assets javascripts elm-modules.js))
-        create_file components_file, components_js
+        create_file components_file, 'elm-modules.js'
       end
 
       private

@@ -6,8 +6,8 @@ module Elm
       desc 'Create default elm.js folder layout and prep application.js'
 
       def create_component_file
-        file_path = File.join('app/assets/javascripts/elm-components', "#{file_name.to_s.capitalize}.elm")
-        template("module.elm", file_path)
+        file_path = File.join('app/assets/javascripts/elm-modules', "#{file_name.to_s.capitalize}.elm")
+        template('module.elm', file_path)
       end
     end
   end
