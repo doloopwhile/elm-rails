@@ -43,8 +43,11 @@ module Elm
       end
 
       def create_elm_modules_js
-        components_file = File.join(*%w(app assets javascripts elm-modules.js))
-        create_file components_file, 'elm-modules.js'
+        copy_file 'elm-modules.js', 'app/assets/javascripts/elm-modules.js'
+      end
+
+      def create_elm_package_json
+        copy_file 'elm-package.json', 'config/elm-package.json'
       end
 
       private

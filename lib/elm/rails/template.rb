@@ -1,6 +1,8 @@
+require 'rails'
 require 'elm/rails'
 require 'tilt/template'
 require 'open3'
+require 'fileutils'
 
 module Elm
   module Rails
@@ -11,42 +13,25 @@ module Elm
       end
 
       def evaluate(context, locals, &block)
-        if @output
-          return @output
+        return @output if @output
+
+        build_dir = "#{::Rails.root}/tmp/elm-builds"
+        FileUtils.mkdir_p(build_dir)
+
+        Dir.chdir(build_dir) do
+          elm_name = File.basename(file).capitalize
+          js_name = "#{elm_name}.js"
+
+          FileUtils.copy(file, elm_name)
+          FileUtils.copy("#{::Rails.root}/config/elm-package.json", 'elm-package.json')
+
+          out, err, status = Open3.capture3("#{elm_executable_path} make #{elm_name} --yes --output #{js_name}")
+          ::Rails.logger.debug out
+          ::Rails.logger.error err
+          fail err unless status.success?
+          @output = File.read(js_name)
         end
 
-        Dir.mktmpdir do |dir|
-          Dir.chdir(dir) do
-            elm_name = File.basename(file).capitalize
-            js_name = "#{elm_name}.js"
-
-            FileUtils.copy(file, elm_name)
-            File.write 'elm-package.json', <<-EOS
-{
-    "version": "1.0.0",
-    "summary": "helpful summary of your project, less than 80 characters",
-    "repository": "https://github.com/USER/PROJECT.git",
-    "license": "BSD3",
-    "source-directories": [
-        "."
-    ],
-    "exposed-modules": [],
-    "dependencies": {
-        "elm-lang/core": "2.1.0 <= v < 3.0.0",
-        "evancz/elm-html": "3.0.0 <= v < 5.0.0"
-    },
-    "elm-version": "0.15.1 <= v < 0.16.0"
-}
-            EOS
-            out, err, status = Open3.capture3("#{elm_command_path} make #{elm_name} --yes --output #{js_name}")
-            ::Rails.logger.debug out
-            ::Rails.logger.error err
-            unless status.success?
-              fail err
-            end
-            @output = File.read(js_name)
-          end
-        end
         @output
       end
 
@@ -65,8 +50,9 @@ module Elm
 
       private
 
-      def elm_command_path
-        File.expand_path '../../js/elm/binwrappers/elm', __FILE__
+      def elm_executable_path
+        path = ::Rails.application.config.elm.executable
+        path || File.expand_path('../../js/elm/binwrappers/elm', __FILE__)
       end
     end
   end
