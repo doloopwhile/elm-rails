@@ -1,12 +1,8 @@
-# Elm::Rails
-
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/elm/rails`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+# elm-rails
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Add this line to your Gemfile and execute `bundle`:
 
 ```ruby
 gem 'elm-rails'
@@ -14,11 +10,11 @@ gem 'elm-rails'
 
 And then execute:
 
-    $ bundle
+    $ bin/rails g elm:install
 
-Or install it yourself as:
+This will:
 
-    $ gem install elm-rails
+  - create `app/assets/javascripts/elm-modules.js` manifest file and `app/assets/javascripts/elm-modules` directory where elm modules are created.
 
 ## Usage
 

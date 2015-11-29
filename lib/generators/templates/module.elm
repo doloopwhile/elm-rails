@@ -1,4 +1,4 @@
-module <%= file_name.to_s.capitalize %> where
+module <%= file_name.camelize %> where
 
 import Html exposing (..)
 
