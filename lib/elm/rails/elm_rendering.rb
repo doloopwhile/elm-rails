@@ -4,16 +4,20 @@ module Elm
   module Rails
     module ElmRendering
       def render_elm_js(dir_path)
-        make_elm(dir_path, 'elm.js')
+        elm_make(dir_path, 'elm.js')
+        render file: File.join(dir_path, 'elm.js')
       end
 
       def render_elm_html(dir_path)
-        make_elm(dir_path, 'elm.html')
+        elm_make(dir_path, 'elm.html')
+        render html: make_elm(dir_path, 'elm.html')
       end
 
       private
 
-      def make_elm(dir_path, output_filename)
+      def elm_make(dir_path, output_filename)
+        return unless recompile_required
+
         Dir.chdir(dir_path) do
           elm_files = Dir.glob('**/*.elm').reject { |p| p.start_with?('elm-stuff/') }
           cmd = Shellwords.join([elm_executable_path, 'make'] + elm_files + ['--yes', '--output', output_filename])
@@ -22,7 +26,12 @@ module Elm
           ::Rails.logger.error(err)
           fail err unless status.success?
         end
-        render file: File.join(dir_path, output_filename)
+      end
+
+      def recompile_required
+        debug = ::Rails.application.config.elm.debug
+        return debug unless debug.nil?
+        !(::Rails.env.production?)
       end
 
       def elm_executable_path
