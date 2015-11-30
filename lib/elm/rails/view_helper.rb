@@ -19,29 +19,6 @@ module Elm
         javascript_tag("Elm.fullscreen(Elm.#{name}, #{port_values.to_json})", options, &block)
       end
 
-      def elm_javascript(elm_directory_path)
-        return @output if @output
-
-        build_dir = "#{::Rails.root}/tmp/elm-builds"
-        FileUtils.mkdir_p(build_dir)
-
-        Dir.chdir(build_dir) do
-          elm_name = File.basename(file).capitalize
-          js_name = "#{elm_name}.js"
-
-          FileUtils.copy(file, elm_name)
-          FileUtils.copy("#{::Rails.root}/config/elm-package.json", 'elm-package.json')
-
-          out, err, status = Open3.capture3("#{elm_executable_path} make #{elm_name} --yes --output #{js_name}")
-          ::Rails.logger.debug out
-          ::Rails.logger.error err
-          fail err unless status.success?
-          @output = File.read(js_name)
-        end
-
-        @output
-      end
-
       private
 
       def elm_executable_path
